@@ -34,7 +34,7 @@ public class YaTV {
     WhoHasTheLongestList,
     HowManyUsersSubscribedHighestRatingAndAvailableForMobilePhones,
     PeopleWatchedVideoWithMostNumberOfTags,
-    USAAllAppsWatchVideos,
+    AllAppsWatchVideosByCountry,
     WhichVideoIsPopularInEachCountry
   }
 
@@ -132,7 +132,6 @@ public class YaTV {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.AddAShowToMyList, null);
         }
       } else if (queryNum == 4) {
@@ -145,7 +144,6 @@ public class YaTV {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.AddLatestVideo, null);
         }
       } else if (queryNum == 6) {
@@ -158,7 +156,6 @@ public class YaTV {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.FindAllFreeVideos, null);
         }
       } else if (queryNum == 8) {
@@ -168,52 +165,45 @@ public class YaTV {
           return new QueryData(QueryTypes.FindAllLongVideos, null);
         }
       } else if (queryNum == 9) {
-        if (args.length != 2) {
+        if (args.length != 3) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
-          return new QueryData(QueryTypes.ProduceARankedListOfRevenue, null);
+          return new QueryData(QueryTypes.ProduceARankedListOfRevenue, args[2]);
         }
       } else if (queryNum == 10) {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.ProduceARankedListOfWatch, null);
         }
       } else if (queryNum == 11) {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.WhoHasTheLongestList, null);
         }
       } else if (queryNum == 12) {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.HowManyUsersSubscribedHighestRatingAndAvailableForMobilePhones, null);
         }
       } else if (queryNum == 13) {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.PeopleWatchedVideoWithMostNumberOfTags, null);
         }
       } else if (queryNum == 14) {
-        if (args.length != 2) {
+        if (args.length != 3) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
-          return new QueryData(QueryTypes.USAAllAppsWatchVideos, null);
+          return new QueryData(QueryTypes.AllAppsWatchVideosByCountry, args[2]);
         }
       } else if (queryNum == 15) {
         if (args.length != 2) {
           return _usage();
         } else {
-          Integer.valueOf(args[2]);
           return new QueryData(QueryTypes.WhichVideoIsPopularInEachCountry, null);
         }
       } else {
@@ -267,60 +257,94 @@ public class YaTV {
         // adding a subscription
         PreparedStatement stmt = connection.prepareStatement(
             "INSERT INTO [Subscription] ([UserId],[AppId],[Cost],[Expiration])\n"
-                + "VALUES (11, 1, 4.99, '2021-07-18 00:00:00');"); 
+                + "VALUES (10, 6, 4.99, '2021-07-18 00:00:00');"); 
 
         stmt.executeUpdate();
         
-        //all the subscription of jess
-        PreparedStatement jessSub = connection.prepareStatement(
-            "select * from subscription join app on subscription.AppId = app.Id where userid = 11"); 
+        //all the subscription of user 10 to app 6
+        PreparedStatement newSub = connection.prepareStatement(
+            "select * from subscription join app on subscription.AppId = app.Id where userid = 10"); 
         
-        ResultSet res = jessSub.executeQuery();
+        ResultSet res = newSub.executeQuery();
         
         // shows that we have added the subscription
         while (res.next()) {
-          System.out.printf("%d. %d %d (%s)%n", res.getInt("*"), res.getInt("app.id"), res.getString("app.name"),
-                     res.getInt("subscription.Cost"), res.getString("subscription.Expiration"));
+          System.out.printf("%d. %d $ %s %s %n", res.getInt("UserId"), res.getInt("AppId"),
+                     res.getDouble("Cost"), res.getString("Expiration"));
         }
         res.close();
         stmt.close();
         
       } else if (qd.queryType == QueryTypes.AddAShowToMyList) {
         // code for query #3
+        // add a show into mylist
         PreparedStatement stmt = connection.prepareStatement(
-            "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 7, true);\n"
-                + "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 8, true);\n"
-                + "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 9, true);\n"
-                + "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 10, true);"); 
+            "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 7, 1);");
+        PreparedStatement l2 = connection.prepareStatement(
+            "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 8, 1);");
+        PreparedStatement l3 = connection.prepareStatement(
+            "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 9, 1);");
+        PreparedStatement l4 = connection.prepareStatement(
+            "INSERT INTO [MyList] ([Userid], [VideoId], [InShow?]) VALUES (9, 10, 1)");
 
-        ResultSet res = stmt.executeQuery();
+        stmt.executeUpdate();
+        l2.executeUpdate();
+        l3.executeUpdate();
+        l4.executeUpdate();
+        
+        PreparedStatement user9mylist = connection.prepareStatement(
+            "SELECT * from MyList Where Userid = 9"); 
+        
+        ResultSet res = user9mylist.executeQuery();
+        
         while (res.next()) {
           System.out.printf("%d %d%n", res.getInt("Userid"), res.getInt("VideoId"));
         }
         res.close();
         stmt.close();
+        l2.close();
+        l3.close();
+        l4.close();
       } else if (qd.queryType == QueryTypes.UpdateVersionOnPlatform) {
         // code for query #4
+        // updating the version
         PreparedStatement stmt = connection.prepareStatement(
-            "UPDATE [AppPlatform] SET [Version] = 7.7 Where [PlatformId] = 1 AND [AppId] = 9;\n"
-                + "UPDATE [AppPlatform] SET [Rating] = 8.2 Where [PlatformId] = 1 AND [AppId] = 9;"); 
+            "UPDATE [AppPlatform] SET [Version] = 7.7 Where [PlatformId] = 1 AND [AppId] = 9;"); 
+        // update the rating 
+        PreparedStatement rating = connection.prepareStatement(
+            "UPDATE [AppPlatform] SET [Rating] = 8.2 Where [PlatformId] = 1 AND [AppId] = 9;"); 
+        
+        stmt.executeUpdate();
+        rating.executeUpdate();
 
-        ResultSet res = stmt.executeQuery();
+        PreparedStatement platform = connection.prepareStatement(
+            "SELECT * from AppPlatform WHERE PlatformId = 1 AND AppId = 9"); 
+        
+        ResultSet res = platform.executeQuery();
+        
         while (res.next()) {
-          System.out.printf("%d %d%n", res.getInt("Version"), res.getInt("Rating"));
+          System.out.printf("platform number %d app id %d version %s rating %s %n", res.getInt("platformId"),
+              res.getInt("AppId"), res.getDouble("Version"), res.getDouble("Rating"));
         }
         res.close();
         stmt.close();
+        rating.close();
       } else if (qd.queryType == QueryTypes.AddLatestVideo) {
         // code for query #5
+        // adding the lastest video to the episode
         PreparedStatement stmt = connection.prepareStatement(
             "INSERT INTO [Video]  ([AppId], [Title], [Description],\n"
                 + "                      [ReleaseDate], [Duration], [Free], \n"
                 + "                      [Count], [ShowId], [Season Number], [Episode])\n"
                 + "Values (1,'friends 5','having some friends', '2020-11-15 00:00:00',\n"
-                + "        1200, false, 0, 1, 1, 5);"); 
+                + "        1200, 0, 0, 1, 1, 5);"); 
 
-        ResultSet res = stmt.executeQuery();
+        stmt.executeUpdate();
+        
+        PreparedStatement platform = connection.prepareStatement(
+            "SELECT * from Video WHERE showid = 1"); 
+        
+        ResultSet res = platform.executeQuery();
         while (res.next()) {
           System.out.printf("%d %s %s %s %d %s %d %d %d %d%n", res.getInt("AppId"), res.getString("Title"), 
               res.getString("Description"), res.getString("ReleaseDate"), res.getInt("Duration"), res.getString("Free"),
@@ -330,6 +354,7 @@ public class YaTV {
         stmt.close();
       } else if (qd.queryType == QueryTypes.ProduceARankedListOfTop10) {
         // code for query #6
+        // ranked list top 10
         PreparedStatement stmt = connection.prepareStatement(
             "SELECT\n"
                 + "  a.Name,\n"
@@ -354,6 +379,7 @@ public class YaTV {
         stmt.close();
       } else if (qd.queryType == QueryTypes.FindAllFreeVideos) {
         // code for query #7
+        // Find all free videos yay
         PreparedStatement stmt = connection.prepareStatement(
             "select\n"
                 + "  v.Title,\n"
@@ -363,19 +389,20 @@ public class YaTV {
                 + "  join Appplatform a on a.AppId = v.AppId\n"
                 + "  join platform p on p.Id = a.PlatformId\n"
                 + "WHERE\n"
-                + "  v.Free like true\n"
+                + "  v.Free = 1\n"
                 + "  and p.Id = 1\n"
                 + "GROUP BY\n"
                 + "  title;"); 
 
         ResultSet res = stmt.executeQuery();
         while (res.next()) {
-          System.out.printf("%s %s%n", res.getString("Title"), res.getString("Description"));
+          System.out.printf("Title: %s Description: %s %n", res.getString("Title"), res.getString("Description"));
         }
         res.close();
         stmt.close();
       } else if (qd.queryType == QueryTypes.FindAllLongVideos) {
         // code for query #8
+        // all long videos after 2020 that doesn't belong to a show
         PreparedStatement stmt = connection.prepareStatement(
             "SELECT\n"
                 + "  v.Id,\n"
@@ -401,30 +428,36 @@ public class YaTV {
         stmt.close();
       } else if (qd.queryType == QueryTypes.ProduceARankedListOfRevenue) {
         // code for query #9
-        PreparedStatement stmt = connection.prepareStatement(
-            "select\n"
-                + "  s.AppId as App_Id,\n"
-                + "  a.Name as App_Name,\n"
-                + "  ROUND(sum(s.Cost), 2) as Revenue\n"
-                + "from\n"
-                + "  User u\n"
-                + "  inner join Subscription s on u.id = s.UserId\n"
-                + "  inner join App a on a.Id = s.AppId\n"
-                + "where\n"
-                + "  u.Country LIKE 'USA'\n"
-                + "group by\n"
-                + "  s.AppId\n"
-                + "order by\n"
-                + "  revenue desc;"); 
+        // ranked list of revenues by country
+        final String sql = "select\n"
+            + "  s.AppId as App_Id,\n"
+            + "  a.Name as App_Name,\n"
+            + "  ROUND(sum(s.Cost), 2) as Revenue\n"
+            + "from\n"
+            + "  User u\n"
+            + "  inner join Subscription s on u.id = s.UserId\n"
+            + "  inner join App a on a.Id = s.AppId\n"
+            + "where\n"
+            + "  u.Country LIKE? \n"
+            + "group by\n"
+            + "  s.AppId\n"
+            + "order by\n"
+            + "  revenue desc;";
 
-        ResultSet res = stmt.executeQuery();
-        while (res.next()) {
-          System.out.printf("%d %s %d%n", res.getInt("App_Id"), res.getString("App_Name"), res.getInt("Revenue"));
+        try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+          stmt.setString(1, qd.queryParam);
+          
+          try (final ResultSet res = stmt.executeQuery()) {
+            while (res.next()) {
+              System.out.printf("%d %s $%s %n", res.getInt("App_Id"), res.getString("App_Name"), res.getDouble("Revenue"));
+            
+            }
+          }
         }
-        res.close();
-        stmt.close();
       } else if (qd.queryType == QueryTypes.ProduceARankedListOfWatch) {
         // code for query #10
+        // ranked list of watch by tag count
         PreparedStatement stmt = connection.prepareStatement(
             "select\n"
                 + "  COUNT(t.Tag) as Tag_Count,\n"
@@ -446,6 +479,7 @@ public class YaTV {
         stmt.close();
       } else if (qd.queryType == QueryTypes.WhoHasTheLongestList) {
         // code for query #11
+        // which user has the longest list
         PreparedStatement stmt = connection.prepareStatement(
             "Select *\n"
                 + "from(\n"
@@ -468,6 +502,7 @@ public class YaTV {
         stmt.close();
       } else if (qd.queryType == QueryTypes.HowManyUsersSubscribedHighestRatingAndAvailableForMobilePhones) {
         // code for query #12
+        // how many users subscribed to the highest rating app that is also available for mobile phones?
         PreparedStatement stmt = connection.prepareStatement(
             "Select count(Id) as num \n"
                 + "From(\n"
@@ -493,6 +528,7 @@ public class YaTV {
         stmt.close();
       } else if (qd.queryType == QueryTypes.PeopleWatchedVideoWithMostNumberOfTags) {
         // code for query #13
+        // list of people that watched the video with the most number of tags
         PreparedStatement stmt = connection.prepareStatement(
             "select s2.FirstName,\n"
                 + "s2.LastName,\n"
@@ -513,12 +549,13 @@ public class YaTV {
 
         ResultSet res = stmt.executeQuery();
         while (res.next()) {
-          System.out.printf("%s %s %d%n", res.getString("FirstName"), res.getString("LastName"), res.getInt("UserId"));
+          System.out.printf("%s %s %d%n", res.getString("s2.FirstName"), res.getString("s2.LastName"), res.getInt("s2.UserId"));
         }
         res.close();
         stmt.close();
-      } else if (qd.queryType == QueryTypes.USAAllAppsWatchVideos) {
+      } else if (qd.queryType == QueryTypes.AllAppsWatchVideosByCountry) {
         // code for query #14
+        // list of apps used by the user in a particular country 
         PreparedStatement stmt = connection.prepareStatement(
             "Select a.Name,\n"
                 + "Version,\n"
@@ -527,22 +564,26 @@ public class YaTV {
                 + "select id\n"
                 + "From User u\n"
                 + "join UserVideo uv on uv.UserId = u.Id\n"
-                + "where Country = 'USA'\n"
+                + "where Country = ?\n"
                 + "group by id) s1\n"
                 + "join App a on a.Id = s1.Id\n"
                 + "join AppPlatform ap on ap.AppId = a.Id\n"
                 + "join Platform p on p.Id = ap.PlatformId\n"
                 + "where Mobile = 1 and s1.Id = a.ID\n"
                 + "Order by a.Name,Version,Rating;"); 
+        
+        stmt.setString(1, qd.queryParam);
 
         ResultSet res = stmt.executeQuery();
         while (res.next()) {
-          System.out.printf("%s %d %d%n", res.getString("Name"), res.getInt("Version"), res.getInt("Rating"));
+          System.out.printf("%s version %s rating %s%n", res.getString("Name"), res.getDouble("Version"), res.getDouble("Rating"));
         }
         res.close();
         stmt.close();
       } else if (qd.queryType == QueryTypes.WhichVideoIsPopularInEachCountry) {
         // code for query #15
+        // show which video is popular (recerives the more than 3 likes) in each country and 
+        // from which platform they are watching the video from order by Country then number of likes 
         PreparedStatement stmt = connection.prepareStatement(
             "Select v.Title,\n"
                 + "s1.Country,\n"
