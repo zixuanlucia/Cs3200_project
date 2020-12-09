@@ -1,22 +1,19 @@
 # Cs3200_project
 
+Steps to generate our database in Beekeeper Studio:
+1. download our project.sqlite.sql file to your computer 
+2. Open the project.sqlite.sql file and copy all the code
+3. In Beekeeper, chose SQLite as the connection Type. For the Database file connect to an empty .sqlite file.
+4. After you connect to the empty file, in the first query paste all the code from the project.sqlite.sql file and click run
+5. In the left corner , Tables and Views click refresh. All the tables and data are imported. You then  can run all our task queries. 
 
 
 
 
-We only have report queries so far and these are still a work in progress.
 
-Query a:
-Counts the number of Users that watch videos on ISO.
 
-Query b:
-Finds the User that spends the most amount of money on subscription with ISO
 
-Query c:
-Finds the User/Users that uses the highest rating app on a particular platform.
 
-Query d:
-Creates a list of Users that watched the Video that had the most likes.
 
-Query e:
-The count of all Shows that have more than 5 seasons.
+
+
