@@ -8,6 +8,11 @@ Steps to generate our database in Beekeeper Studio:
 5. In the left corner , Tables and Views click refresh. All the tables and data are imported. You then  can run all our task queries. 
 
 
+Youtube video of the annotated walk through which allows us to access the database.
+https://youtu.be/fpbFxdmnMks
+
+
+
 
 
 
