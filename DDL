@@ -1,0 +1,163 @@
+/* droping all the relevant tables so we can create a new one with our data */
+DROP TABLE if exists [User];
+DROP TABLE if exists [Video];
+DROP TABLE if exists [MyList];
+DROP TABLE if exists [App];
+DROP TABLE if exists [AppPlatform];
+DROP TABLE if exists [Platform];
+DROP TABLE if exists [MyVideo];
+DROP TABLE if exists [Show];
+DROP TABLE if exists [Season];
+DROP TABLE if exists [Subscription];
+DROP TABLE if exists [Tags];
+DROP TABLE if exists [UserVideo];
+
+/*******************************************************************************
+   Create Tables
+********************************************************************************/
+create table User
+(
+  'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'Email' NVARCHAR NOT NULL,
+  'FirstName' NVARCHAR NOT NULL,
+  'LastName' NVARCHAR NOT NULL,
+  'Country' NVARCHAR NOT NULL,
+  'Password' NVARCHAR NOT NULL
+);
+
+create table App
+(
+  'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'Name' NVARCHAR NOT NULL,
+  'Description' NVARCHAR(300)
+);
+
+create table Video
+(
+  'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'AppId' INTEGER NOT NULL,
+  'Title' NVARCHAR NOT NULL,
+  'Description' NVARCHAR(200),
+  'ReleaseDate' DATETIME NOT NULL,
+  'Duration' INT NOT NULL, /* in seconds */
+  'Free' BOOLEAN NOT NULL,
+  'Count' INT NOT NULL,
+  'ShowId' INT, /* show id can be null because video does not have to belong to any particular show */
+  'Season Number' INT,  
+  'Episode' INT,
+
+  CONSTRAINT 'FK_VideoOnApp', 
+  foreign key ('AppId') references 'App'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
+  CONSTRAINT 'FK_VideosShow',
+  foreign key ('ShowId') references 'Show'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
+  CONSTRAINT 'FK_VideosSeasonNum',
+  foreign key ('Season Number') references 'season'('Number') ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+create table Show
+(
+  'Id' integer PRIMARY KEY AUTOINCREMENT,
+  'Title' nvarchar NOT NULL,
+  'Description' nvarchar(300)
+);
+
+create table Season
+(
+  'ShowId' integer NOT NULL,
+  'Number' integer  NOT NULL,
+  
+  CONSTRAINT 'PK_Season' PRIMARY KEY  ('ShowId', 'Number'),
+  
+  CONSTRAINT 'FK_ShowOfSeason', 
+  foreign key ('ShowId') references 'Show'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+create table Subscription
+(
+  'UserId' Integer NOT NULL,
+  'AppId' integer NOT NULL,
+  'Cost' NUMERIC (10,2) NOT NULL,
+  'Expiration' datetime NOT NULL,
+  
+  CONSTRAINT 'PK_SHOW' PRIMARY KEY  ('UserId', 'AppId'),
+  
+  CONSTRAINT 'FK_UserSubscriptionId', 
+  foreign key ('UserId') references 'User'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
+  CONSTRAINT 'FK_SubscriptionAppName', 
+  foreign key ('AppId') references 'App'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+
+create table Platform
+(
+  'Id' integer PRIMARY KEY AUTOINCREMENT,
+  'Name' nvarchar NOT NULL,
+  'Mobile' boolean NOT NULL
+);
+
+create table AppPlatform
+(
+  'AppId' integer NOT NULL,
+  'PlatformId' integer NOT NULL,
+  'Version' numeric NOT NULL,
+  'Rating' numeric, /* if no one bother to give a rating then it is null, does not mean it is bad */
+  
+  /* the same version of the same app for the same platform cannot have 2 ratings*/
+  CONSTRAINT 'PK_AppPlatform' PRIMARY KEY  ('AppId', 'Version', 'PlatformId'),
+  
+  CONSTRAINT 'FK_AppUsed',
+  foreign key ('AppId') references 'App'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
+  CONSTRAINT 'FK_PlatformUsed', 
+  foreign key ('PlatformId') references 'Platform'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+create table UserVideo
+(
+  'UserId' integer NOT NULL,
+  'VideoId' integer NOT NULL,
+  'Likes' boolean, /* if it's null it means that the user does not have an opinion */
+  
+  CONSTRAINT 'PK_UserVideo' PRIMARY KEY  ('UserId', 'VideoId'),
+  
+  CONSTRAINT 'FK_UserIdUserVideo', 
+  foreign key ('UserId') references 'User'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
+  CONSTRAINT 'FK_VideoIDUserVideo', 
+  foreign key ('VideoId') references 'Video'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+create table Tags
+(
+  'VideoId' integer NOT NULL,
+  'Tag' nvarchar(20) NOT NULL,
+  
+  CONSTRAINT 'PK_Tags' PRIMARY KEY  ('VideoId', 'Tag'),
+  
+  CONSTRAINT 'FK_TagsForVideos', 
+  foreign key ('VideoId') references 'Video'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+create table MyList
+(
+  'UserId' INT NOT NULL,
+  'VideoId' INT NOT NULL,
+  'InShow?' BOOLEAN NOT NULL,
+  
+  CONSTRAINT 'FK_ListOwner', 
+  foreign key ('UserId') references 'User'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
+  CONSTRAINT 'FK_VideosInList', 
+  foreign key ('VideoId') references 'Video'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+/*******************************************************************************
+   Indexs
+********************************************************************************/
+CREATE INDEX [Video_ShowId] ON [Video] ([Title]);
+CREATE INDEX [Show_Title] ON [Show] ([Title]);
+CREATE INDEX [User_Email] ON [User] ([Email]);
+CREATE INDEX [App_Name] ON [App] ([Name]);
+CREATE INDEX [Platform_Name] ON [Platform] ([Name]);
