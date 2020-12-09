@@ -12,13 +12,13 @@ Youtube video of the annotated walk through which allows us to access the databa
 https://youtu.be/fpbFxdmnMks
 
 
+To get the database running on java:
+1. create a new java project 
+2. put the yatv.java file into the default package of the database
+3. add sqlite-jdbc-3.8.11.2.jar onto the class path of this file
+4. when you want to run a query, enter the path\to\something.sqlite file followed by the <task query number> and a <parameter> if there is one
 
 
-
-
-
-
-
-
+Youtube video on Task Queries:
 
 
