@@ -153,10 +153,10 @@ public class YaTV {
           return new QueryData(QueryTypes.ProduceARankedListOfTop10, null);
         }
       } else if (queryNum == 7) {
-        if (args.length != 2) {
+        if (args.length != 3) {
           return _usage();
         } else {
-          return new QueryData(QueryTypes.FindAllFreeVideos, null);
+          return new QueryData(QueryTypes.FindAllFreeVideos, args[2]);
         }
       } else if (queryNum == 8) {
         if (args.length != 2) {
@@ -379,7 +379,7 @@ public class YaTV {
         stmt.close();
       } else if (qd.queryType == QueryTypes.FindAllFreeVideos) {
         // code for query #7
-        // Find all free videos yay
+        // Find all free videos yay on a particular platform.
         PreparedStatement stmt = connection.prepareStatement(
             "select\n"
                 + "  v.Title,\n"
@@ -390,9 +390,11 @@ public class YaTV {
                 + "  join platform p on p.Id = a.PlatformId\n"
                 + "WHERE\n"
                 + "  v.Free = 1\n"
-                + "  and p.Id = 1\n"
+                + "  and p.Id =?\n"
                 + "GROUP BY\n"
                 + "  title;"); 
+        
+        stmt.setString(1, qd.queryParam);
 
         ResultSet res = stmt.executeQuery();
         while (res.next()) {
