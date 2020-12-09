@@ -40,14 +40,21 @@ create table Video
   'ReleaseDate' DATETIME NOT NULL,
   'Duration' INT NOT NULL, /* in seconds */
   'Free' BOOLEAN NOT NULL,
-  'Count' INT,
+  'Count' INT NOT NULL,
   'ShowId' INT,
+  'Season Number' INT,  
+  'Episode' INT,
+
+  
   
   CONSTRAINT 'FK_VideoOnApp', 
   foreign key ('AppId') references 'App'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
   
   CONSTRAINT 'FK_VideosShow',
-  foreign key ('ShowId') references 'Show'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+  foreign key ('ShowId') references 'Show'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
+  CONSTRAINT 'FK_VideosSeasonNum',
+  foreign key ('Season Number') references 'season'('Number') ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 create table Show
@@ -60,17 +67,12 @@ create table Show
 create table Season
 (
   'ShowId' integer NOT NULL,
-  'Season' integer  NOT NULL,
-  'Episode' integer  NOT NULL,
-  'VideoId' integer NOT NULL,
+  'Number' integer  NOT NULL,
   
-  CONSTRAINT 'PK_Season' PRIMARY KEY  ('ShowId', 'VideoId'),
+  CONSTRAINT 'PK_Season' PRIMARY KEY  ('ShowId', 'Number'),
   
   CONSTRAINT 'FK_ShowOfSeason', 
-  foreign key ('ShowId') references 'Show'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
-  
-  CONSTRAINT 'FK_VideoOfShow', 
-  foreign key ('VideoId') references 'Video'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
+  foreign key ('ShowId') references 'Show'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 create table Subscription
@@ -143,6 +145,7 @@ create table MyList
 (
   'UserId' INT NOT NULL,
   'VideoId' INT NOT NULL,
+  'InShow?' BOOLEAN NOT NULL,
   
   CONSTRAINT 'FK_ListOwner', 
   foreign key ('UserId') references 'User'('Id') ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -153,8 +156,11 @@ create table MyList
 /*******************************************************************************
    Indexs
 ********************************************************************************/
-CREATE INDEX [Video_ShowId] ON [Video] ([ShowId]);
-
+CREATE INDEX [Video_ShowId] ON [Video] ([Title]);
+CREATE INDEX [Show_Title] ON [Show] ([Title]);
+CREATE INDEX [User_Email] ON [User] ([Email]);
+CREATE INDEX [App_Name] ON [App] ([Name]);
+CREATE INDEX [Platform_Name] ON [Platform] ([Name]);
 
 
 /*******************************************************************************
@@ -259,95 +265,74 @@ INSERT INTO [Show] ([Title] ,[Description]) VALUES ('hahahahaha','a chinese real
 INSERT INTO [Show] ([Title] ,[Description]) VALUES ('Running Man','a korean reality show');
 
 
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,1,1,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,2,1,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,3,2,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,4,2,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,5,3,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,6,3,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (1,7,1,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (1,8,1,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (1,9,2,3);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (1,10,2,4);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,15,1,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,16,1,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,17,2,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,18,2,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,19,2,3);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,20,2,4);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,21,2,5);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,22,2,6);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,23,2,7);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,24,2,8);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,25,2,9);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,26,2,10);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (11,27,2,11);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,28,4,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,29,4,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,30,4,3);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,31,5,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,32,5,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,33,5,3);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (7,34,5,4);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (2,35,1,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (3,36,1,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (4,37,2,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (4,40,2,2);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (5,38,1,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (6,39,1,1);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (8,41,1,4);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (8,42,2,4);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (8,43,5,7);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (9,44,1,10);
-INSERT INTO [Season] ([ShowId],[VideoId],[Season],[Episode]) VALUES (10,45,3,3);
+
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (1,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (1,2);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (2,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (3,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (4,2);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (5,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (6,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (7,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (7,2);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (7,3);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (7,4);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (7,5);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (8,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (8,2);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (8,5);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (9,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (10,3);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (11,1);
+INSERT INTO [Season] ([ShowId],[Number]) VALUES (11,2);
 
 
 
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2045-02-18 00:00:00',160, true, 520,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2024-02-18 00:00:00',160, true, 350,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2023-02-18 00:00:00',160, true, 13855,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2020-02-18 00:00:00',160, true, 12464,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2021-02-18 00:00:00',160, true, 1246577,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2020-02-18 00:00:00',160, false, 40369245,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (1,'friends 1','having some friends', '2020-02-18 00:00:00',1200, true, 34,1);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [ShowId])  Values (1,'friends 2','having some friends', '2020-02-18 00:00:00',1320, true,1);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (1,'friends 3','having some friends', '2021-02-18 00:00:00',1483, true, 354365,1);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (1,'friends 4','having some friends', '2020-02-18 00:00:00',1365, false, 32,1);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2045-02-18 00:00:00',160, true, 520,7, 1, 1);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2024-02-18 00:00:00',160, true, 350,7, 1, 2);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2023-02-18 00:00:00',160, true, 13855, 7, 2, 3);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2020-02-18 00:00:00',160, true, 12464, 7, 2, 4);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2021-02-18 00:00:00',160, true, 1246577, 7, 3, 5);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2020-02-18 00:00:00',160, false, 40369245,7 , 3, 6);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (1,'friends 1','having some friends', '2020-02-18 00:00:00',1200, true, 34, 1, 1, 1);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (1,'friends 2','having some friends', '2020-02-18 00:00:00',1320, true, 1, 1, 1, 2);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (1,'friends 3','having some friends', '2021-02-18 00:00:00',1483, true, 354365,1, 1, 3);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (1,'friends 4','having some friends', '2020-02-18 00:00:00',1365, false, 32, 1, 1, 4);
 INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count]) Values (3,'gaoxiaoshipin','funny', '2020-02-18 00:00:00',3683, true, 42564);
 INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count]) Values (3,'wanyouxishipin','fun', '2020-02-18 00:00:00',160, true, 45124);
 INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count]) Values (5,'happy camp','meet the stars', '2020-02-18 00:00:00',7229, false, 49103493);
 INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count]) Values (5,'movie1','just a movie', '2020-02-18 00:00:00',8124, true, 348);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 49,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 48,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 43,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 42,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 40,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 47,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 43,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 42,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 4,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 9,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 8,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 21,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 2,11);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 52, 7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 51,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 59,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 50, 7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 20,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 5,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 2,7);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (4,'big bang','boom', '2019-06-18 00:00:00',1300, false, 500, 2);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (4,'alone','so lonely these days', '2013-06-18 00:23:00',3502, true, 3450, 3);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (9,'OakIsland','reality tv of your favorite people', '2013-06-18 00:23:00', 3602, true, 12059, 4);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (9,'Civil war','just south carolina being south carolina', '2013-06-18 00:23:00', 7834, true, 2, 5);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (10,'The Wire','scary scary', '2013-06-18 00:23:00', 6350, false, 10, 6);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (9,'OakIsland','reality tv of your favorite people', '2013-06-18 00:23:00', 3602, true, 12059, 4);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (11,'monther meet','some funfun', '2013-06-18 00:23:00', 1302, true, 12059, 8);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (11,'meet jack','meeting jack', '2013-06-18 00:23:00', 1109, false, 12059, 8);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (11,'have u met ted','greatest pickup lines', '2013-06-18 00:23:00', 1278, true, 12059, 8);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (9,'Modern day','family is overated', '2013-06-18 00:23:00', 1321, true, 485, 9);
-INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId]) Values (9,'jajajajajajja','jajajajajajajajajajajajaja', '2013-06-18 00:23:00', 6043, true, 0, 10);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 49, 11, 1, 1);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 48, 11, 1, 2);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 43, 11, 1, 3);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 42, 11, 1, 4);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 40, 11, 1, 5);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 47, 11, 1, 6);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 43, 11, 1, 7);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 42, 11, 1, 8);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 4, 11, 2, 1);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 9, 11, 2, 2);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 8, 11, 2, 3);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 21, 11, 2, 4);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (6,'RunningMan','not so serious', '2020-02-18 00:00:00',3205, true, 2, 11, 2, 5);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 52, 7, 4, 6);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 51, 7, 4, 7);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 59, 7, 4, 10);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 50, 7, 5, 3);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 20, 7, 5, 4);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 5, 7, 5, 5);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (2,'sql learing','learn sql in two hours', '2019-02-18 00:00:00',160, false, 2, 7, 5, 14);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (4,'big bang','boom', '2019-06-18 00:00:00',1300, false, 500, 2, 1, 15);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (4,'alone','so lonely these days', '2013-06-18 00:23:00',3502, true, 3450, 3, 1, 2);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (9,'OakIsland','reality tv of your favorite people', '2013-06-18 00:23:00', 3602, true, 12059, 4, 2, 4);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (9,'Civil war','just south carolina being south carolina', '2013-06-18 00:23:00', 7834, true, 2, 5, 1, 5);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (10,'The Wire','scary scary', '2013-06-18 00:23:00', 6350, false, 10, 6, 1, 3);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (9,'OakIsland','reality tv of your favorite people', '2013-06-18 00:23:00', 3602, true, 12059, 4, 2, 6);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (11,'monther meet','some funfun', '2013-06-18 00:23:00', 1302, true, 12059, 8, 1, 3);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (11,'meet jack','meeting jack', '2013-06-18 00:23:00', 1109, false, 12059, 8, 2, 5);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (11,'have u met ted','greatest pickup lines', '2013-06-18 00:23:00', 1278, true, 12059, 8, 5, 20);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (9,'Modern day','family is overated', '2013-06-18 00:23:00', 1321, true, 485, 9, 1, 2);
+INSERT INTO [Video] ([AppId], [Title], [Description], [ReleaseDate], [Duration], [Free], [Count],[ShowId], [Season Number], [Episode]) Values (9,'jajajajajajja','jajajajajajajajajajajajaja', '2013-06-18 00:23:00', 6043, true, 0, 10, 3, 5);
 
 
 
@@ -363,18 +348,15 @@ INSERT INTO [UserVideo] ([UserId],[VideoId],[Likes]) VALUES (6, 9, true);
 INSERT INTO [UserVideo] ([UserId],[VideoId],[Likes]) VALUES (6, 1, true);
 
 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (1,11); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (2,7); /* adding friends to person 2's list*/
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (2,8); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (2,9); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (2,10); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (3,11); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (4,13); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (5,12); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (6,14); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (7,13); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (8,11); 
-INSERT INTO [MyList] ([UserId],[VideoId]) VALUES (9,11); 
-
-
-  
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (1,11, false); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (2,7, true); /* adding friends to person 2's list*/
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (2,8,true); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (2,9,true); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (2,10,true); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (2,11,false); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (4,13,false); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (5,12,false); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (6,14,false); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (7,13,false); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (8,11,false); 
+INSERT INTO [MyList] ([UserId],[VideoId],[InShow?]) VALUES (9,11,false); 
